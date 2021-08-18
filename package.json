@@ -1,0 +1,12 @@
+{
+  "name": "nextcloud-desktop",
+  "version": "1.0.0",
+  "description": "This is an npm-mirror of [nextcloud/desktop](https://github.com/nextcloud/desktop)'s AppImages and is subsequently [GPL2+ licensed](https://github.com/nextcloud/desktop#scroll-license).",
+  "bin": "./index.js",
+  "author": "",
+  "license": "GPL-2.0-or-later",
+  "dependencies": {
+    "@octokit/rest": "^18.9.1",
+    "node-fetch": "^2.6.1"
+  }
+}
