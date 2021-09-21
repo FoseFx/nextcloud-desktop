@@ -2,8 +2,13 @@
 
 const { Octokit } = require("@octokit/rest");
 const fs = require("fs");
+const path = require("path");
 const fetch = require("node-fetch");
 const { spawn } = require("child_process");
+
+const BIN_PATH = path.join(__dirname, "./bin");
+const VERSION_TXT_PATH = path.join(BIN_PATH, "./version.txt");
+const APPIMG_PATH = path.join(BIN_PATH, "./nextcloud.AppImage");
 
 const repoInfo = {
   owner: "nextcloud",
@@ -34,7 +39,7 @@ async function checkAndUpdate() {
 
 function getCurrentVersion() {
   try {
-    const file = fs.readFileSync("./bin/version.txt", { encoding: "utf-8" });
+    const file = fs.readFileSync(VERSION_TXT_PATH, { encoding: "utf-8" });
     return file.trim();
   } catch (e) {
     if (e.code && e.code === "ENOENT") {
@@ -46,7 +51,7 @@ function getCurrentVersion() {
 
 function makeSureBinExists() {
   try {
-    fs.mkdirSync("./bin");
+    fs.mkdirSync(BIN_PATH);
     return;
   } catch (e) {
     if (e.code && e.code === "EEXIST") {
@@ -58,7 +63,7 @@ function makeSureBinExists() {
 
 function removeOld() {
   try {
-    fs.unlinkSync("./bin/nextcloud.AppImage");
+    fs.unlinkSync(APPIMG_PATH);
   } catch (e) {
     if (e.code && e.code === "ENOENT") {
       return;
@@ -77,7 +82,7 @@ function download(url) {
     })
     .then((stream) => {
       return new Promise((resolve, reject) => {
-        const fStream = fs.createWriteStream("./bin/nextcloud.AppImage");
+        const fStream = fs.createWriteStream(APPIMG_PATH);
         stream.pipe(fStream);
         fStream.on("error", (e) => reject(e));
         fStream.on("close", (e) => {
@@ -86,17 +91,17 @@ function download(url) {
       });
     })
     .then(() => {
-      fs.chmodSync("./bin/nextcloud.AppImage", 0o775);
+      fs.chmodSync(APPIMG_PATH, 0o775);
     });
 }
 
 function writeVersion(newVersion) {
-  fs.writeFileSync("./bin/version.txt", newVersion, { encoding: "utf-8" });
+  fs.writeFileSync(VERSION_TXT_PATH, newVersion, { encoding: "utf-8" });
 }
 
 checkAndUpdate()
   .then(() => {
-    spawn("./bin/nextcloud.AppImage", { detached: true }).unref();
+    spawn(APPIMG_PATH, { detached: true }).unref();
     process.exit(0);
   })
   .catch((e) => {
